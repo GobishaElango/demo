@@ -1,0 +1,483 @@
+// Modal and Table Management
+document.getElementById("addButton").onclick = function() {
+    document.getElementById("addShipmentFormModal").style.display = "block";
+	document.getElementById("action").value="add";
+};
+
+document.getElementById("deleteButton").onclick = function() {
+    deleteSelectedRows();
+};
+
+document.querySelector(".close").onclick = function() {
+    document.getElementById("addShipmentFormModal").style.display = "none";
+};
+
+document.querySelector(".close-view").onclick = function() {
+    document.getElementById("viewShipmentModal").style.display = "none";
+};
+
+document.querySelector(".close-notification").onclick = function() {
+    document.getElementById("notificationModal").style.display = "none";
+};
+
+document.getElementById("addLineButton").onclick = function() {
+    addLine();
+};
+
+document.getElementById("cancelLineButton").onclick = function() {
+    clearLineInputs();
+};
+
+document.getElementById("addShipmentForm").onsubmit = function(event) {
+    event.preventDefault(); // Prevent form submission
+    submitShipment();
+};
+
+let currentEditRow = null; // Track the row being edited
+let currentEditCombinedRow = null; // Track the row being edited in the combined table
+let rowToDelete = null; // Store the row to be deleted
+let isShipmentLineDelete = false; // Flag for shipment line deletion
+var shipmentLines = document.getElementById("shipmentLines");
+var lineTableRows = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+
+// Add or update a line in the shipment
+function addLine() {
+    const productId = document.getElementById("product_id").value;
+    const quantity = document.getElementById("quantity").value;
+
+    // Validation: Check for empty fields
+    if (!productId || !quantity) {
+        alert("Please fill in both product ID and quantity.");
+        return;
+    }
+	
+	if (quantity <= 0) {
+	        alert("Please enter a quantity greater than 0.");
+	        return;
+	    }
+	
+    const lineTable = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+
+    if (currentEditRow) {
+        // Update existing row
+        currentEditRow.cells[0].innerText = productId;
+        currentEditRow.cells[1].innerText = quantity;
+        currentEditRow = null;
+        document.getElementById("addLineButton").innerText = "Add Line";
+    } else {
+        // Add new row
+        const newRow = lineTable.insertRow();
+        newRow.insertCell(0).innerText = productId;
+        newRow.insertCell(1).innerText = quantity;
+
+        // Add Edit/Delete buttons
+        const actionCell = newRow.insertCell(2);
+        actionCell.appendChild(createButton('edit-btn', '<button type="button" class="icon-btn"><i class="fas fa-edit"></i></button>', () => editLine(newRow)));
+        actionCell.appendChild(createButton('delete-btn', '<button type="button" class="icon-btn"><i class="fas fa-trash"></i></button>', () => deleteShipmentLine(newRow)));
+    }
+
+    clearLineInputs(); // Clear form after adding
+}
+
+function createButton(className, iconHtml, clickHandler) {
+    const button = document.createElement("button");
+    button.className = `action-btn ${className}`;
+    button.type = "button"; // Ensure button doesn't submit the form
+    button.innerHTML = iconHtml;
+    button.onclick = clickHandler;
+    return button;
+}
+
+// Edit a line in the shipment
+function editLine(row) {
+    currentEditRow = row;
+    document.getElementById("product_id").value = row.cells[0].innerText;
+    document.getElementById("quantity").value = row.cells[1].innerText;
+    document.getElementById("addLineButton").innerText = "Update Line";
+}
+
+// Delete a line in the shipment
+function deleteShipmentLine(row) {
+    // Set the confirmation message
+    const productId = row.cells[0].innerText;
+    const quantity = row.cells[1].innerText;
+
+    document.getElementById("deleteConfirmationMessage").innerText = 
+        `Are you sure you want to delete this shipment line with Product ID: ${productId} and Quantity: ${quantity}?`;
+    
+    // Show the confirmation modal
+    document.getElementById("deleteConfirmationModal").style.display = "block";
+
+    // Store the row to be deleted
+    rowToDelete = row; // Store the reference to the row
+    isShipmentLineDelete = true; // Set flag to indicate deletion of a shipment line
+}
+
+// Clear inputs for adding/editing lines
+function clearLineInputs() {
+    document.getElementById("product_id").value = '';
+    document.getElementById("quantity").value = '';
+	
+
+}
+
+// Submit the shipment form
+function submitShipment() {
+    const documentNo = document.getElementById("document_no").value;
+    const documentDate = document.getElementById("document_date").value;
+    const customerId = document.getElementById("customer_id").value;
+	const createdBy = "22";
+	const updatedBy = "22";
+
+    const lineTable = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+    const lineRows = lineTable.rows;
+
+    if (lineRows.length === 0) {
+        showNotification("Please add at least one product line.");
+        return;
+    }
+
+	var sl = "";
+    const products = [];
+    for (let row of lineRows) {
+        const productId = row.cells[0].innerText;
+        const quantity = row.cells[1].innerText;
+		sl += row.cells[0].innerText + "?" + row.cells[1].innerText + "|"
+        products.push({ productId, quantity });
+    }
+	
+	var action = document.getElementById("action").value;
+	var inoutid = "";
+	
+	if(action==="edit"){
+		inoutid="&inout_id=" + currentEditCombinedRow.id.replace('row-','');
+		document.getElementById("ln-"+currentEditCombinedRow.id.replace('row-','')).value=sl;
+	}
+		
+	var params = `action=${(action)}${(inoutid)}&documentNo=${(documentNo)}&documentDate=${documentDate}&customerId=${customerId}&createdBy=${createdBy}&updatedBy=${updatedBy}&sl=${(sl)}` ;
+
+    if (currentEditCombinedRow) {
+        currentEditCombinedRow.cells[1].innerText = documentNo;
+        currentEditCombinedRow.cells[2].innerText = documentDate;
+        currentEditCombinedRow.cells[3].innerText = customerId;
+		currentEditCombinedRow.cells[4].innerText = createdBy;
+		currentEditCombinedRow.cells[5].innerText = updatedBy;
+        currentEditCombinedRow.dataset.lines = JSON.stringify(products);
+        currentEditCombinedRow = null;
+    } else {
+        const combinedTable = document.getElementById("combinedTable").getElementsByTagName("tbody")[0];
+        const newRow = combinedTable.insertRow();
+        newRow.insertCell(0).innerHTML = `<input type="checkbox" class="row-checkbox">`;
+        newRow.insertCell(1).innerText = documentNo;
+        newRow.insertCell(2).innerText = documentDate;
+        newRow.insertCell(3).innerText = customerId;
+        newRow.insertCell(4).innerText = "22";
+        newRow.insertCell(5).innerText = "22";
+        newRow.dataset.lines = JSON.stringify(products);
+
+		// Create a div to contain the buttons
+		        const actionCell = newRow.insertCell(6);
+		        const buttonContainer = document.createElement('div');
+				buttonContainer.style.display = 'flex';
+		        buttonContainer.style.gap = '8px';
+		        buttonContainer.style.justifyContent = 'center';
+		        buttonContainer.style.alignItems = 'center';
+
+		        // Create and append the buttons
+		        buttonContainer.appendChild(createButton('edit-btn', '<button><i class="fas fa-edit"></i></button>', () => editrow(newRow)));
+		        buttonContainer.appendChild(createButton('view-btn', '<button><i class="fas fa-eye"></i></button>', () => viewShipment(newRow)));
+		        buttonContainer.appendChild(createButton('delete-btn', '<button><i class="fas fa-trash"></i></button>', () => deleteShipmentRow(newRow)));
+
+		        // Append the button container to the action cell
+		        actionCell.appendChild(buttonContainer);
+        
+    }
+	
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+	    if(xhr.readyState == 4 && xhr.status == 200) {
+	        var data = xhr.responseText;
+			console.log(xhr.responseText);  // This logs the response to the console
+	        
+	    }
+		
+	};
+
+	// Open the POST request to your servlet
+	xhr.open("POST", "GoodsShipping", true);
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	xhr.send(params);
+
+
+    document.getElementById("addShipmentForm").reset();
+    clearLineInputs();
+	const lineTableBody = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+
+    // Remove all rows from the tbody
+    while (lineTableBody && lineTableBody.rows.length > 0) {
+        lineTableBody.deleteRow(0); // Remove the first row until no rows are left
+    }
+    document.getElementById("addShipmentFormModal").style.display = "none";
+	//window.location.reload();
+}
+
+// Edit the shipment row
+function editrow(row) {
+    currentEditCombinedRow = row;
+    const documentNo = row.cells[1].innerText;
+    const documentDate = row.cells[2].innerText;
+    const customerId = row.cells[3].innerText;
+	const ln = document.getElementById("ln-"+currentEditCombinedRow.id.replace('row-','')).value;
+
+    document.getElementById("document_no").value = documentNo;
+    document.getElementById("document_date").value = documentDate;
+    document.getElementById("customer_id").value = customerId;
+
+    const products = ln.split("|");
+    const lineTable = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+    lineTable.innerHTML = '';
+
+    products.forEach(product => {
+		if (!product.includes("?")) return; 
+		let productTemp = product.split("?");
+        const newRow = lineTable.insertRow();
+        newRow.insertCell(0).innerText = productTemp[0];
+        newRow.insertCell(1).innerText = productTemp[1];
+
+        const actionCell = newRow.insertCell(2);
+        actionCell.appendChild(createButton('edit-btn', '<i class="fas fa-edit"></i>', () => editLine(newRow)));
+        actionCell.appendChild(createButton('delete-btn', '<i class="fas fa-trash"></i>', () => deleteShipmentLine(newRow)));
+    });
+
+    document.getElementById("addShipmentFormModal").style.display = "block";
+	document.getElementById("action").value="edit";
+}
+
+// View the shipment row
+function viewShipment(row) {
+	console.log("Row data-lines:", row.dataset.lines);
+    const documentNo = row.cells[1].innerText;
+    const documentDate = row.cells[2].innerText;
+    const customerId = row.cells[3].innerText;
+
+    document.getElementById("viewDocumentNo").value = documentNo;
+    document.getElementById("viewDocumentDate").value = documentDate;
+    document.getElementById("viewCustomerId").value = customerId;
+
+    const products = document.getElementById("ln-"+row.id.replace('row-','')).value.split("|");
+    const viewLineTable = document.getElementById("viewLineTable").getElementsByTagName("tbody")[0];
+    viewLineTable.innerHTML = '';
+
+    products.forEach(product => {
+		if (!product.includes("?")) return; 
+		let productTemp = product.split("?");
+        const newRow = viewLineTable.insertRow();
+        newRow.insertCell(0).innerText = productTemp[0];
+        newRow.insertCell(1).innerText = productTemp[1];
+    });
+
+    document.getElementById("viewShipmentModal").style.display = "block";
+}
+
+// Delete a shipment row
+function deleteShipmentRow(row) {
+    const documentNo = row.cells[1].innerText;
+    const customerId = row.cells[3].innerText;
+
+    document.getElementById("deleteConfirmationMessage").innerText = 
+        `Are you sure you want to delete this shipment with Document No: ${documentNo} and Customer ID: ${customerId}?`;
+
+    // Show the confirmation modal
+    document.getElementById("deleteConfirmationModal").style.display = "block";
+
+    // Store the row to be deleted
+    rowToDelete = row; // Store the reference to the row
+    isShipmentLineDelete = false; // Reset flag for shipment line deletion
+}
+
+
+// Confirm deletion
+function confirmDelete() {
+    const combinedTable = document.getElementById("combinedTable").getElementsByTagName("tbody")[0];
+    const lineTable = document.getElementById("lineTable").getElementsByTagName("tbody")[0];
+
+    if (isShipmentLineDelete) {
+        // Deleting a single shipment line
+        lineTable.deleteRow(rowToDelete.rowIndex - 1); // Adjust index as needed for line table
+        showNotification(`Shipment line with Product ID: ${rowToDelete.cells[0].innerText} has been deleted.`);
+    } else {
+        // Deleting selected shipment rows
+        combinedTable.deleteRow(rowToDelete.rowIndex - 1);
+        showNotification(`Shipment with Customer ID: ${rowToDelete.cells[3].innerText} and Document No: ${rowToDelete.cells[1].innerText} has been deleted.`);
+    }
+
+    rowToDelete = null; // Reset row to delete
+    closeDeleteConfirmation();
+}
+
+//delete Particularrows
+function deleteParticularRows(inoutId, docno) {
+	
+    // Show a confirmation dialog with the specific Document Number
+    var userConfirmed = confirm(`Are you sure you want to delete this shipment with Document No ${docno}?`);
+
+    if (userConfirmed) {
+        var action = "delete";
+        var xhr = new XMLHttpRequest();
+        var params = `action=${action}&inoutId=${encodeURIComponent(inoutId)}`;
+
+        xhr.open("POST", "GoodsShipping", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(params);
+
+        xhr.onload = function () {
+			var messageElement = document.getElementById("message");
+            if (xhr.status === 200) {
+                console.log("Row deleted successfully");
+
+                // Remove the row from the DOM
+                var row = document.getElementById(`row-${inoutId}`);
+                if (row) {
+                    row.remove();
+                }
+				/*tr.remove();*/
+				messageElement.textContent = `Shipment with Document No ${docno} deleted successfully!`;
+				               messageElement.style.color = "green";
+            } else {
+				messageElement.textContent = "Failed to delete shipment. Please try again.";
+				                messageElement.style.color = "red";
+            }
+
+			    // Show the message element
+			    messageElement.style.display = "block";
+
+			    // Optional: Hide the message after a few seconds
+			    setTimeout(() => {
+			        messageElement.style.display = "none";
+			    }, 5000); // Hide after 5 seconds
+			
+        };
+    } else {
+        // If user cancels, do nothing
+        console.log("Deletion canceled by user.");
+    }
+}
+
+// Delete selected rows
+function deleteSelectedRows() {
+	
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    let checked = false;
+    const rowsToDelete = [];
+	let rowsId = "&selected_inout_ids=";
+ 
+    // Check if at least one checkbox is checked
+    checkboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+            checked = true;
+            const row = checkbox.closest('tr');
+            if (row) {
+				rowsId += row.id.replace('row-','') + ",";
+                // Assume Document No is in the second cell (index 1)
+                const documentNo = row.cells[1].innerText; // Adjust the index based on your table structure
+                // Assume Customer ID is in the third cell (index 2)
+                const customerId = row.cells[3].innerText; // Adjust the index based on your table structure
+                rowsToDelete.push(`Document No: ${documentNo}, Customer ID: ${customerId}`);
+            }
+        }
+    }); 
+
+    if(!checked) {
+    // Alert if no checkbox is selected
+    alert('Please select a customer to delete.');
+     }else{
+    // Confirmation before deletion
+	    const shipmentIds = rowsToDelete.join("\n"); // Join selected rows for display
+	    const confirmDelete = confirm(`Are you sure you want to delete the selected customers?\n\n${shipmentIds}`);
+	    if(confirmDelete) {
+	    // Delete checked rows
+	                checkboxes.forEach((checkbox) =>{
+									    if(checkbox.checked) {
+									    const row = checkbox.
+									    closest('tr');
+									    if(row) {
+									             row.remove();
+									            }
+									        }
+									    });
+	    }
+	}
+	var action = "deleteSelected";
+		var xhr = new XMLHttpRequest();
+			
+			var params = `action=${(action)}${(rowsId)}` ;
+			
+			xhr.open("POST", "GoodsShipping", true);
+				xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+				xhr.send(params);
+}
+
+// Function to handle header checkbox click to select/deselect all tbody rows
+function setSelectAllCheckbox() {
+    const headerCheckbox = document.getElementById('selectAllCheckbox');
+    const tbodyCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+
+    tbodyCheckboxes.forEach(checkbox => {
+        checkbox.checked = headerCheckbox.checked;
+    });
+
+    // Update the header checkbox state to make sure it's in the correct state
+    toggleSelectAll();
+}
+
+// Function to toggle the header checkbox state based on the tbody checkboxes
+function toggleSelectAll() {
+    const headerCheckbox = document.getElementById('selectAllCheckbox');
+    const tbodyCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+    let allChecked = true;
+    let someChecked = false;
+
+    tbodyCheckboxes.forEach(checkbox => {
+        if (!checkbox.checked) {
+            allChecked = false;
+        } else {
+            someChecked = true;
+        }
+    });
+
+    headerCheckbox.checked = allChecked;
+    headerCheckbox.indeterminate = !allChecked && someChecked;
+}
+
+// Add event listeners to the tbody checkboxes to handle individual selections
+document.querySelectorAll('tbody input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', toggleSelectAll);
+});
+
+// Add an event listener to the header checkbox for 'click' events
+document.getElementById('selectAllCheckbox').addEventListener('click', setSelectAllCheckbox);
+
+/*function setSelectAllCheckBox(){
+	
+}
+
+function toggleSelectAll(source) {
+    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i] != source)checkboxes[i].checked = source.checked;
+    }
+}*/
+
+// Show notification
+function showNotification(message) {
+    const notificationModal = document.getElementById("notificationModal");
+    notificationModal.querySelector(".notification-message").innerText = message;
+    notificationModal.style.display = "block";
+}
+
+// Close delete confirmation modal
+function closeDeleteConfirmation() {
+    document.getElementById("deleteConfirmationModal").style.display = "none";
+}

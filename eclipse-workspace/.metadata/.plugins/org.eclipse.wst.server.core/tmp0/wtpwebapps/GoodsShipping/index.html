@@ -1,0 +1,157 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goods Shipment</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="center-h1">Goods Shipment</div>
+
+    <div class="header-actions">
+        <div class="search-filter-options">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text1" placeholder="Search..." class="search-input">
+            </div>
+            <div class="filter-dropdown">
+                <select class="dropdown" id="filterDropdown">
+                    <option value="">Filter by...</option>
+                    <option value="documentNo">Document No</option>
+                    <option value="date">Date</option>
+                    <option value="customerNO">Customer No</option>
+                    <option value="customerName">Customer Name</option>
+                </select>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <button class="header-btn" id="addButton">Add</button>
+            <button class="header-btn" id="deleteButton">Delete</button>
+        </div>
+    </div>
+
+    Combined Table for Shipments
+    <table id="combinedTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th> 
+                <th>Document No</th>
+                <th>Date</th>
+                <th>Customer ID</th>
+                <th>Created By</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+            </tr>
+            
+        </thead>
+        <tbody>
+            Dynamically filled with shipment data
+        </tbody>
+    </table>
+
+    Add Shipment Form Modal
+    <div id="addShipmentFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="addShipmentForm">
+                <fieldset>
+                    <legend>Enter Shipment Details</legend>
+                    <label for="document_no">Document No:<span class="required">*</span></label>
+                    <input type="text" id="document_no" name="document_no" required><br><br>
+
+                    <label for="document_date">Document Date:<span class="required">*</span></label>
+                    <input type="date" id="document_date" name="document_date" required><br><br>
+
+                    <label for="customer_id">Customer ID:<span class="required">*</span></label>
+                    <input type="text" id="customer_id" name="customer_id" required><br><br>
+                    <fieldset>
+                        <legend>Enter Shipment Line Details</legend>
+                        <label for="product_id">Product ID:</label>
+                        <input type="text" id="product_id" name="product_id"><br><br>
+    
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity"><br><br>
+
+                        <div class="action-button1">
+                            <button type="button" id="addLineButton">Add Line</button>
+                            <button type="button" id="cancelLineButton">Cancel</button>
+                        </div>
+                        
+                        Shipment Line Table
+                        <table id="lineTable">
+                            <thead>
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th>Quantity</th>
+                                    <th>Actions</th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                Dynamically filled with shipment line data
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <div class="action-button2">
+                        <button type="reset" id="resetFormButton">Reset</button>
+                        <button type="submit" id="submitShipment">Submit</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+   View Shipment Modal
+    <div id="viewShipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-view">&times;</span>
+            <h2>View Shipment</h2>
+            <form>
+                <label for="viewDocumentNo">Document No:</label>
+                <input type="text" id="viewDocumentNo" disabled>
+
+                <label for="viewDocumentDate">Document Date:</label>
+                <input type="text" id="viewDocumentDate" disabled>
+
+                <label for="viewCustomerId">Customer ID:</label>
+                <input type="text" id="viewCustomerId" disabled>
+
+                <h3>Shipment Lines</h3>
+                <table id="viewLineTable">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    
+    
+ Delete Confirmation Modal
+<div id="deleteConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteConfirmation()">&times;</span>
+        <h2>Delete Confirmation</h2>
+        <p id="deleteConfirmationMessage"></p>
+        <button onclick="confirmDelete()">Confirm</button>
+        <button onclick="closeDeleteConfirmation()">Cancel</button>
+    </div>
+</div>
+
+Notification Modal
+<div id="notificationModal" class="modal">
+    <div class="modal-content">
+        <span class="close-notification" onclick="closeDeleteConfirmation()">&times;</span>
+        <h2>Notification</h2>
+        <p class="notification-message"></p>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+ -->

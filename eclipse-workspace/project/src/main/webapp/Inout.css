@@ -1,0 +1,132 @@
+@charset "UTF-8";
+.update-icon {
+    font-size: 20px;
+    color: blue;
+    cursor: pointer;
+    margin-right: 10px;
+    text-align:center;
+  }
+  .delete-icon {
+    font-size: 20px;
+    color: rgb(103, 39, 39);
+    cursor: pointer;
+    text-align:center;
+    padding:4px;
+  }
+  .view-icon{
+  	font-size: 20px;
+    color: black;
+    cursor: pointer;
+    margin-left: 10px;
+    text-align:center;
+  }
+  #action{
+  	width:150px;
+  }
+ 
+ #h1{
+ text-align:center;
+ margin:auto;
+ margin-bottom: 40px;
+ }
+.cancel-icon {
+    position: relative;
+    left: 212px;
+    bottom: 85px;
+    font-size: 30px;
+    /* background-color: rgb(239, 239, 239); */
+    padding: 5px;
+    border-radius: 7px;
+    color: red;
+    cursor: pointer;  
+    transform: translateZ(0);     
+}
+.cancel-icon:hover{
+    transform: scale(1.10);
+}
+ 
+.page {
+    text-align: center;
+    margin-top: 20px; /* Adjust this value as needed */
+}
+ 
+.page a, .page span {
+    margin: 0 5px;
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    color: #007bff; /* Adjust color as needed */
+    border-radius:5px;
+}
+ 
+.page a:hover {
+    background-color: #007bff;
+    color: white;
+}
+ 
+.page span {
+    background-color: #007bff;
+    color: white;
+    border-radius: 3px;
+}
+
+#LineView {
+    display: none;  /* Initially hidden */
+    position: fixed; /* Overlay effect */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it appears above other elements */
+	text-align:center;
+	margin:auto;
+}
+#inout_table td,th{
+	text-align:center;
+	padding:10px;
+}
+ 
+#inoutLineView {
+    background-color: #fff; /* White background for the content */
+    padding: 20px;
+    border-radius: 20px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto; /* Scroll if content overflows */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align:center;
+    margin:auto;
+}
+ 
+#closeBtn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+ 
+#closeBtn:hover {
+    background-color: #0056b3;
+}
+#icons{
+	font-size: 62px;
+	position: absolute;
+	top: 10px;
+	right:20px;
+}
+
+#m_inout td,th{
+	text-align:center;
+	padding:10px;
+}
+
+#lineHeading{
+	text-align:center;
+	margin-top:-8px;
+}
