@@ -1,5 +1,0 @@
-0:0:0:0:0:0:0:1 - - [12/Aug/2025:11:10:22 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 14110
-0:0:0:0:0:0:0:1 - - [12/Aug/2025:11:10:22 +0530] "GET /PurchaseOrder/purchaseorder.js HTTP/1.1" 200 43048
-0:0:0:0:0:0:0:1 - - [12/Aug/2025:11:10:22 +0530] "GET /PurchaseOrder/purchaseorder.css HTTP/1.1" 200 9609
-0:0:0:0:0:0:0:1 - - [12/Aug/2025:11:57:50 +0530] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 807
-0:0:0:0:0:0:0:1 - - [12/Aug/2025:11:57:50 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 14110
