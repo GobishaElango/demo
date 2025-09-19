@@ -1,0 +1,43 @@
+# ------------------------------------
+# Ignore files and folders at the root level (Gobisha folder)
+# ------------------------------------
+# Ignore Apache Tomcat folders and installers
+apache-tomcat-8.5.99/
+apache-tomcat-10.1.15.exe
+bin/
+conf/
+lib/
+logs/
+temp/
+webapps/
+work/
+
+# Ignore other files at the root
+*.zip
+*.exe
+*.ico
+LICENSE
+NOTICE
+RELEASE-NOTES
+
+# Ignore project-specific build and temporary files
+*.war
+*.class
+*.sql
+
+# Ignore sensitive files
+.env
+
+# ------------------------------------
+# Ignore files and folders within eclipse-workspace
+# ------------------------------------
+# Ignore everything inside eclipse-workspace first
+eclipse-workspace/*
+
+# BUT explicitly track only the PurchaseOrder project
+!eclipse-workspace/PurchaseOrder/
+
+# Ignore Eclipse-specific metadata inside the project
+eclipse-workspace/PurchaseOrder/.settings/
+eclipse-workspace/PurchaseOrder/.classpath
+eclipse-workspace/PurchaseOrder/.project
