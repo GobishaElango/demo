@@ -11,6 +11,7 @@ logs/
 temp/
 webapps/
 work/
+myappfiles/
 
 # Ignore other files at the root
 *.zip
