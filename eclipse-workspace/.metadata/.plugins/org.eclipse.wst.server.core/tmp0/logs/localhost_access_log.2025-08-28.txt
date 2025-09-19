@@ -1,8 +1,0 @@
-127.0.0.1 - - [28/Aug/2025:10:40:54 +0530] "GET / HTTP/1.1" 404 751
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:41:20 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 15004
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:41:20 +0530] "GET /PurchaseOrder/purchaseorder.js HTTP/1.1" 304 -
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:41:20 +0530] "GET /PurchaseOrder/favicon.ico HTTP/1.1" 404 780
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:41:28 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 15004
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:48:41 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 15004
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:10:51:42 +0530] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 807
-0:0:0:0:0:0:0:1 - - [28/Aug/2025:12:24:53 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 15004

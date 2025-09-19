@@ -1,9 +1,0 @@
-INDEX VERSION 1.4+C:\Users\qualian\eclipse-workspace\supermarket\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
-3046920156.index
-1839835777.index
-2779629487.index
-4231340972.index
-2334726038.index
-2541229471.index
-1028945344.index
-3474065999.index

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<monitors>
-  <monitor contentTypes="" port="8080" portId="0" serverId="Tomcat v8.5 Server at localhost" started="false"/>
-  <monitor contentTypes="" port="8086" portId="0" serverId="Tomcat v8.5 Server at localhost" started="false"/>
-</monitors>

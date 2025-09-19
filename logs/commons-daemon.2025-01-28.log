@@ -1,9 +1,0 @@
-[2025-01-28 12:08:19] [info]  [20964] Apache Commons Daemon procrun (1.3.4.0 64-bit) started.
-[2025-01-28 12:08:19] [info]  [20964] Running Service 'Tomcat10.1'...
-[2025-01-28 12:08:19] [info]  [ 9420] Starting service...
-[2025-01-28 12:08:21] [info]  [ 9420] Service started in 1262 milliseconds.
-[2025-02-06 10:09:18] [info]  [22012] Console SHUTDOWN event signaled.
-[2025-02-06 10:09:18] [info]  [22012] Stopping service...
-[2025-02-06 10:09:19] [info]  [22012] Service stop thread completed.
-[2025-02-06 10:09:19] [info]  [20964] Run service finished.
-[2025-02-06 10:09:19] [info]  [20964] Apache Commons Daemon procrun finished.
