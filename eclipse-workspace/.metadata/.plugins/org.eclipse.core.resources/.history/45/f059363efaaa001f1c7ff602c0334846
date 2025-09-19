@@ -1,0 +1,349 @@
+package com.qualiantech.goodsshipment;
+
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+import java.util.UUID;
+
+public class ShipmentInoutDAO {
+
+    private String url = "jdbc:postgresql://localhost:5432/supermarketdb"; // Update with your DB URL
+    private String username = "postgres"; // Update with your DB username
+    private String password = "qualian"; // Update with your DB password
+
+    // Method to get a shipment by its ID
+//    public Vector<ShipmentInoutVO> getShipmentById() throws SQLException {
+//        ShipmentInoutVO shipment = null;
+//        String query = "SELECT * FROM m_inout order by document_no asc";
+//        Connection connection = null;
+//        Vector<ShipmentInoutVO> ls = new Vector<ShipmentInoutVO>();
+//        try {
+//        	Class.forName("org.postgresql.Driver");
+//        	 connection = DriverManager.getConnection(url, username, password);
+//        
+//             PreparedStatement pst = connection.prepareStatement(query) ;
+//            ResultSet rs = pst.executeQuery();
+//            while (rs.next()) {
+//                shipment = new ShipmentInoutVO();
+//                shipment.setInoutId(rs.getString("inout_id"));
+//                shipment.setDocumentNo(rs.getString("document_no"));
+//                shipment.setDocumentDate(rs.getDate("document_date"));
+//                shipment.setCustomerId(rs.getString("customer_id"));
+//                shipment.setCreatedby(rs.getString("createdby"));
+//                shipment.setUpdatedby(rs.getString("updatedby"));
+//                ls.add(shipment);
+//            }
+//            return ls;
+//        	
+//        } catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//        finally {
+//        	connection.close();
+//        }
+//        return ls; 
+//    
+//    }
+    
+    
+  
+        // Add shipment header and its lines
+        public void addShipment(ShipmentInoutVO shipment) throws SQLException {
+        	 	String inoutId = UUID.randomUUID().toString();
+            String insertShipmentSQL = "INSERT INTO public.m_inout (inout_id,document_no, document_date, customer_id, createdby, updatedby) " +
+                                       "VALUES (?,?,?, ?, ?, ?)";
+            String insertLineSQL = "INSERT INTO public.m_inoutline (inout_id, product_id, quantity, createdby, updatedby) " +
+                                   "VALUES (?, ?, ?, ?, ?)";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement stmtShipment = conn.prepareStatement(insertShipmentSQL);
+                 PreparedStatement stmtLine = conn.prepareStatement(insertLineSQL)) {
+
+                // Insert shipment header
+            	    stmtShipment.setObject(1, UUID.fromString(inoutId));
+                stmtShipment.setString(2, shipment.getDocumentNo());
+                stmtShipment.setDate(3, shipment.getDocumentDate());
+                stmtShipment.setString(4, shipment.getCustomerId());
+                stmtShipment.setString(5, shipment.getCreatedby());
+                stmtShipment.setString(6, shipment.getUpdatedby());
+                stmtShipment.executeUpdate();
+
+//                // Get the generated shipment ID (inout_id)
+//                ResultSet generatedKeys = stmtShipment.getGeneratedKeys();
+//                String inoutId = "";
+//                if (generatedKeys.next()) {
+//                    inoutId = generatedKeys.getString(1); // UUID of the inserted shipment
+//                }
+
+                // Insert line items
+                for (ShipmentLineVO line : shipment.getLineItems()) {
+                	    stmtLine.setObject(1, UUID.fromString(inoutId));
+                    stmtLine.setString(2, line.getProductId());
+                    stmtLine.setInt(3, line.getQuantity());
+                    stmtLine.setString(4, shipment.getCreatedby());
+                    stmtLine.setString(5, shipment.getUpdatedby());
+                    stmtLine.addBatch();
+                }
+                stmtLine.executeBatch();  // Execute batch insert for line items
+            }
+        }
+
+        // Add a shipment line
+        public void addShipmentLine(String inoutId, String productId, int quantity, String createdBy, String updatedBy) throws SQLException {
+            String sql = "INSERT INTO public.m_inoutline (inout_id, product_id, quantity, createdby, updatedby) " +
+                         "VALUES (?, ?, ?, ?, ?)";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, inoutId);  // Set the inout_id (foreign key)
+                stmt.setString(2, productId); // Set the product_id
+                stmt.setInt(3, quantity);     // Set the quantity
+                stmt.setString(4, createdBy); // Set the createdby user
+                stmt.setString(5, updatedBy); // Set the updatedby user
+                stmt.executeUpdate();
+            }
+        }
+
+        // Get all line items for a shipment
+        public List<ShipmentLineVO> getShipmentLines(String inoutId) throws SQLException {
+            String sql = "SELECT * FROM public.m_inoutline WHERE inout_id = ?";
+            List<ShipmentLineVO> lines = new ArrayList<>();
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, inoutId);
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    ShipmentLineVO line = new ShipmentLineVO();
+                    line.setInoutlineId(rs.getString("inoutline_id"));
+                    line.setProductId(rs.getString("product_id"));
+                    line.setQuantity(rs.getInt("quantity"));
+                    lines.add(line);
+                }
+            }
+            return lines;
+        }
+
+        // Delete a shipment line
+        public boolean deleteShipmentLine(String inoutlineId) throws SQLException {
+            String sql = "DELETE FROM public.m_inoutline WHERE inoutline_id = ?";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, inoutlineId);
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
+        }
+    
+
+    
+    
+    public Vector<ShipmentInoutVO> getShipmentById() throws SQLException {
+        ShipmentInoutVO shipment = null;
+        String query = "select * from m_inout ORDER BY document_no ASC";
+        Connection connection = null;
+        Vector<ShipmentInoutVO> ls = new Vector<ShipmentInoutVO>();
+
+        try {
+            // Load PostgreSQL driver
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(url, username, password);
+
+            PreparedStatement pst = connection.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+            PreparedStatement pst1 = null;
+            ResultSet rs1 = null;
+
+            // Iterate over the result set to populate shipment headers and line items
+            while (rs.next()) {
+                String currentInoutId = rs.getString("inout_id");
+
+                // Check if a new shipment (header) is encountered
+                if (shipment == null || !shipment.getInoutId().equals(currentInoutId)) {
+                    if (shipment != null) {
+                        // If shipment is not null, add it to the list (before resetting it)
+                        ls.add(shipment);
+                    }
+
+                    // Create a new shipment header
+                    shipment = new ShipmentInoutVO();
+                    shipment.setInoutId(currentInoutId);
+                    shipment.setDocumentNo(rs.getString("document_no"));
+                    shipment.setDocumentDate(rs.getDate("document_date"));
+                    shipment.setCustomerId(rs.getString("customer_id"));
+                    shipment.setCreatedby(rs.getString("createdby"));
+                    shipment.setUpdatedby(rs.getString("updatedby"));
+                    
+                    String queryLine = "select * from m_inoutline where inout_id='" + currentInoutId +"'";
+                    pst1 = connection.prepareStatement(queryLine);
+                    rs1 = pst1.executeQuery();
+                    Vector<ShipmentLineVO> v1 = new Vector<ShipmentLineVO>();
+                    while(rs1.next()) {
+                    	ShipmentLineVO lineItem = new ShipmentLineVO();
+                    	lineItem.setProductId(rs1.getString("product_id"));
+                    	lineItem.setQuantity(rs1.getInt("quantity"));
+                    	v1.add(lineItem);
+                    }
+                    shipment.setLineItems(v1);
+                }
+            }
+
+            // Add the last shipment to the list (if exists)
+            if (shipment != null) {
+                ls.add(shipment);
+            }
+
+            return ls;
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+
+        return ls;
+    }
+
+    
+    public String generateNextDocumentNumber() throws SQLException {
+        String query = "SELECT document_no FROM m_inout WHERE document_no LIKE 'GS%' ORDER BY document_no DESC LIMIT 1";
+        String prefix = "GS";
+        int nextNumber = 1;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pst = connection.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                String lastDocumentNo = rs.getString("document_no");
+                String numberPart = lastDocumentNo.substring(prefix.length());
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            }
+        }
+
+        return prefix + String.format("%03d", nextNumber);
+    }
+
+    public String getLastDocumentNo() throws SQLException {
+        String query = "SELECT document_no FROM m_inout WHERE document_no LIKE 'GS%' ORDER BY document_no DESC LIMIT 1";
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getString("document_no");
+            }
+        }
+        return null;
+    }
+
+    // Method to add a new shipment
+//    public void addShipment(ShipmentInoutVO shipment) throws SQLException {
+//        String query = "INSERT INTO m_inout (document_no, document_date, customer_id, createdby, updatedby) VALUES (?, ?, ?, ?, ?)";
+//
+//        try (Connection connection = DriverManager.getConnection(url, username, password);
+//             PreparedStatement pst = connection.prepareStatement(query)) {
+//            pst.setString(1, shipment.getDocumentNo());
+//            pst.setDate(2, shipment.getDocumentDate());
+//            pst.setString(3, shipment.getCustomerId());
+//             pst.setString(4, shipment.getCreatedby());
+//            pst.setString(5, shipment.getUpdatedby());
+//            pst.executeUpdate();
+//        }
+//    }
+//    
+    // Method to update an existing shipment
+    public void updateShipment(ShipmentInoutVO shipment) throws SQLException {
+        String query = "UPDATE m_inout SET document_no = ?, document_date = ?, customer_id = ?, updatedby = ? WHERE inout_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement pst = connection.prepareStatement(query)) {
+            pst.setString(1, shipment.getDocumentNo());
+            pst.setDate(2, shipment.getDocumentDate());
+            pst.setString(3, shipment.getCustomerId());
+            pst.setString(4, shipment.getUpdatedby());
+            pst.setString(5, shipment.getInoutId());
+            pst.executeUpdate();
+        }
+    }
+
+    public boolean deleteShipment(String inoutId){
+    		String deleteShipmentLineSql="DELETE FROM m_inoutline WHERE inout_id = ?";
+        String deleteShipmentSql = "DELETE FROM m_inout WHERE inout_id = ?";
+        try {
+               Class.forName("org.postgresql.Driver");
+        		Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(deleteShipmentSql);
+
+            stmt.setString(1, inoutId);
+            int affectedRows = stmt.executeUpdate();
+            
+            return affectedRows > 0; // Returns true if at least one row was deleted
+        }
+        catch(Exception e){
+        	return false;
+        }
+        
+    }
+
+
+    // Method to get all shipments with pagination
+    public List<ShipmentInoutVO> main(int page, int recordsPerPage) throws SQLException {
+        List<ShipmentInoutVO> shipments = new ArrayList<>();
+        String query = "SELECT * FROM m_inout LIMIT ? OFFSET ?";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement pst = connection.prepareStatement(query)) {
+            pst.setInt(1, recordsPerPage);
+            pst.setInt(2, (page - 1) * recordsPerPage);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                ShipmentInoutVO shipment = new ShipmentInoutVO();
+                shipment.setInoutId(rs.getString("inout_id"));
+                shipment.setDocumentNo(rs.getString("document_no"));
+                shipment.setDocumentDate(rs.getDate("document_date"));
+                shipment.setCustomerId(rs.getString("customer_id"));
+                shipment.setCreatedby(rs.getString("createdby"));
+                shipment.setUpdatedby(rs.getString("updatedby"));
+                shipments.add(shipment);
+            }
+        }
+        return shipments;
+    }
+    
+    // Method to get the total count of shipments
+    public int getShipmentCount() throws SQLException {
+        String query = "SELECT COUNT(*) FROM m_inout";
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement pst = connection.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+    public Vector<String> getAllCustomerIds() throws SQLException {
+        Vector<String> customerIds = new Vector<>();
+        String sql = "SELECT customer_id FROM customer"; // Adjust the SQL based on your actual table and column names.
+        
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                customerIds.add(resultSet.getString("customer_id")); // Assuming customer_id is the name of your column.
+            }
+        }
+        return customerIds;
+    }
+	
+}

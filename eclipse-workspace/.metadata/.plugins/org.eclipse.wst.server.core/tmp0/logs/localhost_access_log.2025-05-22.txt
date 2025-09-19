@@ -1,0 +1,4 @@
+127.0.0.1 - - [22/May/2025:10:31:25 +0530] "GET / HTTP/1.1" 404 751
+0:0:0:0:0:0:0:1 - - [22/May/2025:10:31:30 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 13367
+0:0:0:0:0:0:0:1 - - [22/May/2025:10:31:30 +0530] "GET /PurchaseOrder/purchaseorder.js HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [22/May/2025:10:31:30 +0530] "GET /PurchaseOrder/favicon.ico HTTP/1.1" 404 780

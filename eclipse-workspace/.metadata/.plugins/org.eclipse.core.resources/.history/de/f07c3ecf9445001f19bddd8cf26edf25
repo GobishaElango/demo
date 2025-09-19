@@ -1,0 +1,162 @@
+package com.qualiantech.database;
+
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
+
+public class GoodsShipment {
+	public static InoutDAO inoutdao = new InoutDAO();
+	public static InoutLineDAO inoutlinedao = new InoutLineDAO();
+	
+	public static void main(String[] args) throws Exception {
+		Scanner sc=new Scanner(System.in);
+		System.out.println();
+		boolean repeat = true;
+		while(repeat) {
+        System.out.print("Press : \n1 to insert \n2 to exit");
+   
+       // \n2 to insert \n3 to update \n4 to delete \n5 to exit \n\nEnter here : "); // \n4 to delete
+        int run = sc.nextInt();
+		switch(run) {
+			case 1:
+				
+			boolean insert = true;
+			while(insert) {
+				insertion(insertInoutDAO());
+				//insertionInoutLineDAO(insertInoutLineDAO());
+				System.out.println("Do you want to insert again? Y/N :");
+				String entry = sc.next();
+				if("Y".equalsIgnoreCase(entry)) 
+					insert = true;
+				else
+					break;		
+			}
+				break;
+			case 2:
+				
+				repeat = false;
+				break;
+			
+			default:
+				System.out.println("invalid");
+				break;
+	}
+		}
+	}
+	public static InoutDAO insertInoutDAO() throws SQLException, ParseException {
+		getCustomerDetail();
+		Scanner sc = new Scanner(System.in);
+		
+		System.out.println("Select the Customer ID : ");
+		String customerId = sc.next();
+		
+		System.out.println("Enter the documentNo : ");
+		String documentNo = sc.next();
+		
+		System.out.print("Enter a date (dd/mm/yyyy): "); 
+		String dateStr = sc.next();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");  
+		java.util.Date documentDate = sdf.parse(dateStr); 
+		
+		String inoutID = getInoutId( documentNo);
+		insertInoutLineDAO(inoutID);
+		return new InoutDAO(customerId,documentNo, documentDate);
+		
+	}
+	public static InoutLineDAO insertInoutLineDAO(String inoutID) throws SQLException {
+		//getInoutIdDetail();
+		getProductDetail();
+		
+		Scanner sc = new Scanner(System.in);
+		
+//		System.out.println("Select the Inout ID : ");
+//		String inoutId = sc.next();
+		System.out.println("Select the Product ID : ");
+		String productId = sc.next();
+		System.out.println("Enter the quantity : ");
+		int quantity = sc.nextInt();
+		return new InoutLineDAO(inoutID,productId,quantity);
+	}
+	
+	public static void getCustomerDetail() throws SQLException {
+		HashMap<String,String> customerList=new HashMap();
+		Connection connection = DBConnection.getConnection();
+		String query="Select customer_id,value from customer ;";
+		PreparedStatement pst = connection.prepareStatement(query);
+		ResultSet rst= pst.executeQuery();
+		while(rst.next()) {
+			customerList.put(rst.getString("customer_id"),rst.getString("value"));	
+		}
+		System.out.println(customerList);
+	}
+	public static void getProductDetail() throws SQLException {
+		HashMap<String,String> productList=new HashMap();
+		Connection connection = DBConnection.getConnection();
+		String query="Select product_id,value from product ;";
+		PreparedStatement pst = connection.prepareStatement(query);
+		ResultSet rst= pst.executeQuery();
+		while(rst.next()) {
+			productList.put(rst.getString("product_id"),rst.getString("value"));	
+		}
+		System.out.println(productList);
+	}
+	
+	public static String getInoutId(String document_no) throws SQLException {
+//		HashMap<String,String> inoutList=new HashMap();
+		 List<String> inoutList = new ArrayList<>();
+		Connection connection = DBConnection.getConnection();
+		String query="Select inout_id from m_inout where document_no=?;";
+		PreparedStatement pst = connection.prepareStatement(query);
+		pst.setString(1, document_no);
+		ResultSet rst = pst.executeQuery();
+//		while(rst.next()) {
+//			inoutList.add(rst.getString("inout_id"));	
+//		}
+		//System.out.println(inoutList);
+		return rst.getString("inout_id");
+	}
+	public static void insertion(InoutDAO inoutdao) throws SQLException {
+		try(Connection connection = DBConnection.getConnection()) {
+			String query = "insert into m_inout(customer_id,document_no,document_date) values(?,?,?)";
+			PreparedStatement pst = connection.prepareStatement(query);
+			pst.setString(1, inoutdao.getCustomerId());
+			pst.setString(2, inoutdao.getDocumentNo());
+			Timestamp fromTS1 = new Timestamp(inoutdao.getDocumentDate().getTime());
+			//System.out.println(fromTS1);
+			pst.setTimestamp(3,fromTS1);
+			pst.executeUpdate();
+			
+			System.out.println("inserted");
+		}
+	}
+	
+	public static void insertionInoutLineDAO(InoutLineDAO inoutlinedao) throws SQLException {
+		try(Connection connection = DBConnection.getConnection()) {
+			String query = "insert into m_inoutline(inout_id,product_id,quantity) values(?,?,?)";
+			PreparedStatement pst = connection.prepareStatement(query);
+			pst.setString(1, inoutlinedao.getInoutId());
+			pst.setString(2, inoutlinedao.getProductId());
+			pst.setInt(3, inoutlinedao.getQuantity());
+			pst.executeUpdate();
+			
+			System.out.println("inserted");
+		}
+	}
+
+}
+
+
+
+/*public void insertValues(String args[]) throws SQLException{
+	String query ="insert into inout (inout_id, isactive, created, createdby, updated, updatedby, document_id, document_date, customer_id) values(?,?,?,?,?,?,?,?,?)";
+	Connection con= DriverManager.getConnection(url, username, password);
+	PreparedStatement = con.prepareStatement(query)) {
+		
+	}
+}*/

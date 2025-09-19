@@ -1,0 +1,6 @@
+127.0.0.1 - - [19/Sep/2025:10:17:40 +0530] "GET / HTTP/1.1" 404 751
+0:0:0:0:0:0:0:1 - - [19/Sep/2025:10:18:20 +0530] "GET /PurchaseOrder/ViewPurchaseorder?page=1 HTTP/1.1" 200 10903
+0:0:0:0:0:0:0:1 - - [19/Sep/2025:10:18:20 +0530] "GET /PurchaseOrder/purchaseorder.css HTTP/1.1" 200 9634
+0:0:0:0:0:0:0:1 - - [19/Sep/2025:10:18:20 +0530] "GET /PurchaseOrder/purchaseorder.js HTTP/1.1" 200 40313
+0:0:0:0:0:0:0:1 - - [19/Sep/2025:10:18:20 +0530] "GET /PurchaseOrder/favicon.ico HTTP/1.1" 404 780
+0:0:0:0:0:0:0:1 - - [19/Sep/2025:10:19:49 +0530] "GET /PurchaseOrder/favicon.ico HTTP/1.1" 404 780

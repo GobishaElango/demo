@@ -1,0 +1,530 @@
+@charset "UTF-8";
+*{
+    box-sizing: border-box;
+}
+body{
+    width:90%;
+    margin:15px auto;
+    background-color: #f9f9f9;
+}
+sup{
+    color: red;
+}
+@keyframes grow {
+	0% {
+    	transform: scale(0.5);
+      	opacity: 0;
+    }
+    100% {
+      	transform: scale(1);
+		opacity: 1;
+    }
+}
+#mainTable{
+    height:400px;
+    margin-top:10px;
+    #quoteTable{
+    	width:100%;
+        border-collapse: collapse;
+        border: 1px solid gray;
+    }
+    td {
+        border: 1px solid gray;
+        padding: 6px 6px;
+        text-align: center;
+    }
+    tr{
+        background-color:white;
+    }
+    thead tr{
+        padding-top:20px;
+        /*position: sticky;
+        top:0;*/
+    }
+    th{
+        border: 1px solid gray;
+        background-color:#ccc;
+        text-align:center;
+        padding:16px 6px;
+        font-size:18px;
+    }
+    #searchBox {
+    	position: relative;
+    	float: left;
+    	padding: 0;
+    	margin:15px 0px 12px;
+    }
+    #searchIcon {
+    	position: absolute;
+    	top: 48%;
+    	left: 10px; 
+    	transform: translateY(-50%);
+    	font-size: 16px;
+    	color: #999; 
+    }
+	#searchQuoteInput{
+   		padding: 8px 14px 8px 32px;
+    	width: 260px;
+    	border-radius: 5px;
+    	outline: none;
+    	border: 1.5px solid #ccc;
+    	font-size: 16px;
+	}
+	#searchQuote:focus {
+    	border: 1.5px solid black;
+	}
+	#confirmMsg{
+		float: left;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin:16px 12px 0px 12px;
+        font-size: 16px;
+        font-weight: bold;
+        animation: grow 0.3s ease-in;
+    	color:green;
+	}
+    #addQuoteBtn{
+        float: right;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin:15px 12px 0px 12px;
+        font-size: 16px;
+        text-align:center;
+    } 
+    #deleteQuoteBtn{
+        float: right;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin:15px 0px 12px;
+        font-size: 16px;
+    } 
+    #quoteBody i{
+        color: black;
+        margin-left:2px;
+        padding: 8px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    #quoteBody i:hover{
+        background-color: #ccc;
+        border-radius: 50%;
+    }
+    #quoteBody i:active{
+        background-color:black;
+        color:white;
+    }
+    .check{
+        transform: scale(1.3);
+        cursor: pointer;
+    }
+    
+    #notFound{
+        animation: grow 0.3s ease-in;
+    	padding:15px 0px; 
+    	font-size:18px; 
+    	color:red;
+    }
+ 
+}
+#pagination {
+    margin-top: 10px;
+    margin-bottom: 10%;
+    text-align: center;
+}
+#pagination a {
+    color: #333;
+	padding: 8px 16px;
+	text-decoration: none;
+	transition: background-color .3s, color .3s;
+	border: 1px solid #ccc;
+	margin: 0 3px;
+}
+#pagination a.active {
+	background-color: #333;
+	color: white;
+	border-color: #333;
+}
+#pagination a:hover:not(.active) {
+	background-color: #ddd;
+	color: #333;
+}
+.disableLink{
+	pointer-events: none;
+	background-color:#eee;
+	opacity:0.5
+}
+#linedetails{
+    position: fixed; 
+    display: none; 
+    width: 100%; 
+    height: 100%; 
+    top:0;
+    left:0;
+    background-color: rgba(0,0,0,0.5); 
+    z-index: 2; 
+    overflow: auto;
+    #lineItemDiv{
+        width:700px;
+        padding:20px;
+        border: 1px solid black;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin: 60px auto;
+    }
+    .right{
+        
+        margin-left:450px;
+        padding: 4px 0;
+        
+    }
+    .left{
+       position: absolute;
+       top:152px;
+       p{
+        margin: 12px;
+       }
+       
+    }
+    #livendor,#livendorAdd,#livendorphone{
+       margin-left: 15px;
+      
+    }
+    label{
+        font-size: 16px;
+        font-weight: 600;
+        padding-right: 5px;
+    }
+    .close-btn {
+        display: flex;
+        justify-content: center;
+        margin-top:10px;
+        position: absolute;
+        top: 70px;
+        right: 310px;
+        cursor: pointer;
+    }
+    .close-btn:active{
+        background-color:white;
+        border-radius: 3px;
+    } 
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color:white;
+        margin-top:45px;
+    }
+    td {
+        border: 1px solid gray;
+        padding: 6px 8px;
+        text-align: left
+    }
+    th{
+        border: 1px solid gray;
+        background-color: #eee;
+        padding: 8px;
+        text-align: left
+    }
+    td{
+        font-size: 15px;
+    }
+}
+#formDiv{
+    position: fixed; 
+    display: none; 
+    width: 100%; 
+    height: 100%; 
+    top:0;
+    left:0;
+    background-color: rgba(0,0,0,0.5); 
+    z-index: 2; 
+    overflow: auto;
+    #quoteForm{
+        width:820px;
+        padding: 20px;
+        border: 1px solid black;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin: 25px auto;
+    }
+   
+    input[type="text"],input[type="number"],input[type="date"],select{
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    #quoteDetails{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        label{
+           margin-bottom: 10px;
+        }
+        input{
+            margin-left: 8px;
+        }
+    }
+    #quoteNo{
+        outline: 0;
+    }
+    #vendorDetails{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        label{
+            margin-top:-16px;
+        }
+        select{
+            width: 87%;
+        }
+    
+    }
+    
+    #lineitemTable{
+        width: 100%;
+    }
+    table {
+        border-collapse: collapse;
+        margin:15px 0;
+        border: 1px solid gray;
+    }
+    td {
+        border: 1px solid gray;
+        padding: 4px 8px;
+        text-align: left;
+        background-color:white;
+    }
+    th{
+        border: 1px solid gray;
+        padding: 8px;
+        text-align: left;
+        background-color:#eee; 
+    }
+    #pd{
+        display: inline;
+    }
+    #legend{
+        font-weight:100;
+    }
+    
+    i{
+        color: black;
+        margin-left:4px;
+        padding: 6px;
+    }
+    i:hover{
+        background-color: #ccc;
+        border-radius: 50%;
+    }
+    i:active{
+        background-color:black;
+        color:white;
+    }
+    button{
+        text-align: center;
+        width:90px;
+        padding: 6px 16px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    #productDetail{
+        display: flex;
+        justify-content: space-between;
+        padding-top:4px;
+    }
+    label, legend{
+        font-weight:600;
+    }
+    select{
+        cursor: pointer;
+    }
+    #errorMsg{
+        color: red;
+        margin: 2px;
+        font-size: 14px;
+    }
+    i{
+      cursor: pointer;
+    }
+    .btn{
+        display: flex;
+        justify-content: center;
+        margin-top:10px;
+    
+    }
+    .error{
+        outline: 1px solid red;
+    }
+    .errorDiv{
+        display: flex;
+        height: 20px;
+        padding-top: 2px;
+        span{
+            display: inline;
+            color: red;
+            font-size: 14px;
+        }
+       
+    }
+    #uom{
+        width: 30px;
+        margin: 0 0 0 8px;
+        padding-top: 6px;
+        opacity: 0.8;
+        cursor:default;
+
+    
+    }
+    .checkLineItems{
+        transform: scale(1.2);
+        cursor: pointer;
+    }
+    #deleteSelectedBtn{
+       margin:15px 0 0 0;
+    }
+}
+#linedetails{
+    position: fixed; 
+    display: none; 
+    width: 100%; 
+    height: 100%; 
+    top:0;
+    left:0;
+    background-color: rgba(0,0,0,0.5); 
+    z-index: 2; 
+    overflow: auto;
+    #lineItemDiv{
+        width:700px;
+        padding:20px;
+        border: 1px solid black;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin: 60px auto;
+    }
+    .right{
+        
+        margin-left:450px;
+        padding: 4px 0;
+        
+    }
+    .left{
+       position: absolute;
+       top:152px;
+       p{
+        margin: 12px;
+       }
+       
+    }
+    #livendor,#livendorAdd,#livendorphone{
+       margin-left: 15px;
+      
+    }
+    label{
+        font-size: 16px;
+        font-weight: 600;
+        padding-right: 5px;
+    }
+    /* #liquoteId,#liquoteDate,#livtd,#livendor{
+
+    } */
+    .close-btn {
+        display: flex;
+        justify-content: center;
+        margin-top:10px;
+        position: absolute;
+        top: 70px;
+        right: 310px;
+        cursor: pointer;
+    }
+    .close-btn:active{
+        background-color:white;
+        border-radius: 3px;
+    } 
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color:white;
+        margin-top:45px;
+    }
+    td {
+        border: 1px solid gray;
+        padding: 6px 8px;
+        text-align: left
+    }
+    th{
+        border: 1px solid gray;
+        background-color: #eee;
+        padding: 8px;
+        text-align: left
+    }
+    td{
+        font-size: 15px;
+    }
+}
+#alertDiv{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 20;
+    #alertBox{
+        width:450px;
+        height: 140px;
+        padding:20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin: 200px auto;
+    }
+    #alertBtn{
+        display: flex;
+        justify-content: center;
+        button{
+            padding: 4px 12px;
+            margin-left: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    }
+    
+}
+#confirmDiv{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 20;
+    #confirmBox{
+        width:450px;
+        height: 140px;
+        padding:8px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin: 200px auto;
+        text-align: center;
+    }
+    p{
+        margin-top: -12px;
+        height:10px;
+    }
+    #ok{
+        display: inline-block;
+        border: 1px solid black;
+        border-radius: 3px;
+        padding: 4px 18px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 6px;
+        background-color: #ddd;
+        text-decoration:none;
+        color:black;
+    }
+
+}
+

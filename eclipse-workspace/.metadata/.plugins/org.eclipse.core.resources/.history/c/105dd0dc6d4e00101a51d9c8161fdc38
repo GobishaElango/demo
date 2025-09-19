@@ -1,0 +1,1143 @@
+//view
+function formatDateToDDMMYYYY(dateStr) {
+	let [yr, mnth, day] = dateStr.split("-");
+	return `${day}-${mnth}-${yr}`
+}
+
+//update
+function formatDateToYYYYMMDD(dateStr) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr; // fallback in case of bad input
+
+    const year = date.getFullYear();
+    const month = (1 + date.getMonth()).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+
+document.querySelector(".close").onclick = function(event) {
+	closeForm(event);
+};
+
+//show lineItems
+let inViewRow;
+function showLineItem(button, lineItems) {
+		console.log(lineItems);
+		let rows = button.parentNode.parentNode;
+		inViewRow = rows;
+		let lineorderId = document.getElementById("lineorderId");
+		let lineorderDate = document.getElementById("lineorderDate");
+		let linedeliveryDate = document.getElementById("linedeliveryDate");
+		let linevendorNameDetails = document.getElementById("linevendorNameDetails");
+		let linevendorAddressDetails = document.getElementById("linevendorAddressDetails");
+		let linedeliveryAddress = document.getElementById("linedeliveryAddress");
+		let linetotalAmount = document.getElementById("linetotalAmount");
+		let LineItemBody = document.getElementById("LineItemBody");
+		lineorderId.textContent = rows.cells[1].textContent;
+		lineorderDate.textContent = rows.cells[2].textContent;
+		linedeliveryDate.textContent = rows.cells[3].textContent;
+		linevendorNameDetails.textContent = rows.cells[4].textContent;
+		linevendorAddressDetails.textContent = rows.cells[5].textContent;
+		linedeliveryAddress.textContent = rows.cells[6].textContent;
+		linetotalAmount.textContent = rows.cells[7].textContent;
+		lineItems.forEach((lineItem, index) => {
+			let newRow = LineItemBody.insertRow(index);
+			newRow.insertCell(0).innerHTML = lineItem.product
+			newRow.insertCell(1).innerHTML = '&#8377 ' + lineItem.price
+			newRow.insertCell(2).innerHTML = lineItem.quantity
+			newRow.insertCell(3).innerHTML = lineItem.uom
+			newRow.insertCell(4).innerHTML = '&#8377 ' + lineItem.amount
+		})
+
+		inViewRow.style.backgroundColor = "#eee"
+		document.getElementById("linedetails").style.display = "block"
+		document.title = "Purchase Order Details"
+
+	}
+	
+	
+function removeErrorClassMsg(id) {
+		let element = document.getElementById(id);
+		if (element.value == "" || element.value == "Select") {
+			element.classList.add("error");
+		}
+		else {
+			element.classList.remove("error");
+		}
+}
+
+//hide lineItem table
+function hideLineItem() {
+		document.getElementById("linedetails").style.display = "none"
+		document.getElementById("LineItemBody").innerHTML = ""
+		document.title = "Purchaseorders"
+		inViewRow.style.backgroundColor = 'white';
+	}
+
+//set default value
+function initializeFormFields() {
+		document.getElementById("orderDate").valueAsDate = new Date();
+		document.getElementById("orderDate").max = new Date().toISOString().split("T")[0];
+		document.getElementById("deliveryDate").min = new Date().toISOString().split("T")[0];
+		document.getElementById("deliveryDate").value = "";
+		document.getElementById("vendorNameDetails").value = "Select";
+		document.getElementById("vendorAddressDetails").value = "";
+		document.getElementById("deliveryAddress").value = "";
+		document.getElementById("totalAmount").value = "";
+	}
+	
+//clear input fields and Error class  in ADD product
+function clear() {
+		let product = document.getElementById("productName");
+		let price = document.getElementById("price");
+		let quantity = document.getElementById("quantity");
+		document.getElementById("uom").innerHTML = "";
+		product.value = "Select";
+		price.value = "";
+		quantity.value = "";
+		product.classList.remove("error");
+		price.classList.remove("error");
+		quantity.classList.remove("error");
+		quantityError.innerHTML = "";
+		productError.innerHTML = "";
+		priceError.innerHTML = "";
+	}
+	document.getElementById('clearButton').addEventListener('click', clear);
+
+
+//remove  error class in form header feild
+function errorClassRemove() {
+		document.getElementById("orderDate").classList.remove("error");
+		document.getElementById("deliveryDate").classList.remove("error");
+		document.getElementById("vendorNameDetails").classList.remove("error");
+		document.getElementById("vendorAddressDetails").classList.remove("error");
+		document.getElementById("deliveryAddress").classList.remove("error");
+		document.getElementById("legendError").style.borderColor = "#ccc";
+	}
+
+	function validateOrderDate() {
+		let orderDate = document.getElementById("orderDate");
+		if (orderDate.value == "") {
+			orderDate.classList.add("error");
+		}
+		else {
+			orderDate.classList.remove("error");
+			document.getElementById("deliveryDate").min = orderDate.value;
+		}
+		document.getElementById("deliveryDate").value = "";
+	}
+	
+//when orderDate changed
+function validateDeliveryDate() {
+		let orderDate = document.getElementById("orderDate")
+		if (orderDate.value == "") {
+			orderDate.classList.add("error");
+		}
+		else {
+			orderDate.classList.remove("error");
+			document.getElementById("deliveryDate").min = orderDate.value
+		}
+		document.getElementById("deliveryDate").value = "";
+	}
+
+//when click on ADD button
+
+function displayPurchaseorderForm() {
+	document.getElementById("addPurchaseOrderFormModal").style.display = "block";
+	document.getElementById("formHeading").innerHTML = "Add Purchase Order";
+	document.title = "Add Purchase Order";
+	initializeFormFields();
+	document.getElementById("lineItemsBody").innerHTML = "";
+	let submitOrUpdateButton = document.getElementById("submit")
+	submitOrUpdateButton.textContent = "Submit"
+	submitOrUpdateButton.onclick = submitForm
+	let productOptions = document.getElementById("productName").options;
+	for (let i = 0; i < productOptions.length; i++) {
+		productOptions[i].style.display = "block";
+	}
+	let xhttp = new XMLHttpRequest();
+	xhttp.onload = function() {
+		if (this.status == 200) {
+			document.getElementById("orderId").innerHTML = this.responseText;
+		}
+		}
+		xhttp.open('GET', "GeneratePurchaseorderDocumentNo", false);
+		xhttp.send();
+		clear();
+		errorClassRemove()
+	}
+
+//close form when click on cancel btn in form
+function closeForm(event) {
+	document.getElementById("orderDate").value = "";
+		document.getElementById("deliveryDate").value = "";
+		document.getElementById("vendorAddressDetails").value = "";
+		document.getElementById("deliveryAddress").value = "";
+		document.getElementById("totalAmount").value = "";
+		document.getElementById("vendorNameDetails").value = "select";
+		clear();
+		document.getElementById("addPurchaseOrderFormModal").style.display = "none";
+		document.title = "Purchase Order";
+		let formHeading = document.getElementById("formHeading").innerHTML;
+		if (formHeading === "Purchase Order Form") {
+			docId = docId - 1;
+		}
+	}
+
+//for vendor, valid till feild 
+function validateDeliveryDate(id) {
+		let element = document.getElementById(id)
+		if (element.value == "" || element.value == "Select") {
+			element.classList.add("error");
+		}
+		else {
+			element.classList.remove("error");
+		}
+	}
+
+let productError = document.getElementById("productError")
+let priceError = document.getElementById("priceError")
+let quantityError = document.getElementById("quantityError")
+	
+function validatePrice(price) {
+		if (price.value <= 0) {
+			priceError.innerHTML = "* invalid Price"
+			price.value = ""
+		}
+		else {
+			priceError.innerHTML = ""
+			price.classList.remove("error");
+		}
+	}
+
+function validateQuantity(qty) {
+		if (quantity.value <= 0) {
+			quantityError.innerHTML = "* invalid Quantity"
+			quantity.value = ""
+		}
+		else {
+			quantityError.innerHTML = "";
+			quantity.classList.remove("error")
+		}
+	}
+
+
+function validateProductDetail() {
+		let productName = document.getElementById("productName").value;
+		let price = document.getElementById("price").value;
+		let quantity = document.getElementById("quantity").value;
+		let isValid = true;
+		if (productName === "Select") {
+			productError.innerHTML = "* required ";
+			document.getElementById("productName").classList.add("error");
+			isValid = false;
+		}
+		else {
+			productError.innerHTML = "";
+			document.getElementById("productName").classList.remove("error");
+		}
+		if (price === "") {
+			priceError.innerHTML = "* required ";
+			document.getElementById("price").classList.add("error");
+			isValid = false;
+		}
+		else {
+			priceError.innerHTML = "";
+			document.getElementById("price").classList.remove("error");
+		}
+		if (quantity === "") {
+			quantityError.innerHTML = "* required ";
+			document.getElementById("quantity").classList.add("error");
+			isValid = false;
+		}
+		else {
+			quantityError.innerHTML = "";
+			document.getElementById("quantity").classList.remove("error");
+		}
+		return isValid;
+
+	}
+
+//UOM change based on selected product
+function fillProductDetails(product) {
+		const selectedProduct = product.value;
+		const uom = document.getElementById("uom");
+		switch (selectedProduct) {
+			case "Cucumber":
+				uom.innerHTML = "Kg";
+				product.classList.remove("error");
+				productError.innerHTML = "";
+				break;
+			case "Aachi Chilli Powder - 100g":
+			case "Gold Winner Refined Sunflower Oil - 1L":
+			case "Tata Urad Dal - 1Kg":
+			case "Rice - 1Kg":
+			case "Bru Instant Coffee - 200g":
+			case "Maggi Noodles-150g":
+				uom.innerHTML = "pcs";
+				product.classList.remove("error");
+				productError.innerHTML = "";
+				break;
+			case "Orange":
+			case "Onion":
+				uom.innerHTML = "Kg";
+				product.classList.remove("error");
+				productError.innerHTML = "";
+				break;
+			default:
+				uom.innerHTML = "";
+				product.classList.add("error");
+				productError.innerHTML = "* required";
+				break;
+		}
+	}
+	
+// Add lineItem
+function addLineItem() {
+	if (!validateProductDetail()) {
+			return; // Exit function if validation fails
+		}
+		let totalAmount = document.getElementById("totalAmount");
+		let currentTotal = parseInt(totalAmount.value.replace(/[^0-9.]/g, '')) || 0;
+		let productName = document.getElementById("productName").value;
+		let price = document.getElementById("price").value;
+		let quantity = document.getElementById("quantity").value;
+		let uom = document.getElementById("uom").textContent;
+		let amount = price * quantity;
+		let table = document.getElementById("lineItemsBody");
+		let newRow = table.insertRow(table.rows.length);
+		let descCell = newRow.insertCell(0);
+		let priceCell = newRow.insertCell(1);
+		let quantityCell = newRow.insertCell(2);
+		let amountCell = newRow.insertCell(3);
+		let unitCell = newRow.insertCell(4);
+		let actionCell = newRow.insertCell(5);
+		descCell.textContent = productName;
+		priceCell.innerHTML = '&#8377 ' + price;
+		quantityCell.textContent = quantity;
+		amountCell.textContent = uom;
+		unitCell.innerHTML = '&#8377 ' + amount;
+		actionCell.innerHTML = '<i class="fa fa-edit" onclick="updateLineItem(this)"></i><i class="fa fa-trash" onclick="deleteLineItem(this)"></i>';
+		let selectedproduct = document.getElementById("productName").options[document.getElementById("productName").selectedIndex];
+		selectedproduct.style.display = "none";
+		let newTotal = currentTotal + amount;
+		totalAmount.value = '₹' + newTotal.toFixed(2);
+		document.getElementById("legendError").style.borderColor = "#ccc";
+		clear();
+	}
+	document.getElementById('addButton').onclick= addLineItem;
+
+//Update LineItem
+function updateLineItem(button) {
+	let legend = document.getElementById("legend");
+		legend.textContent = "Update Purchase Order Line Details";
+		let table = document.getElementById("lineItemsBody");
+		let rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			rows[i].style.backgroundcolor = "#fff";
+		}
+		let row = button.parentNode.parentNode;
+		row.style.backgroundColor = "#eee";
+		let td = row.getElementsByTagName("td");
+		let addToUpdateButton = document.getElementById("addButton");
+		let clearToCancel = document.getElementById("clearButton");
+		let product = document.getElementById("productName");
+		let price = document.getElementById("price");
+		let quantity = document.getElementById("quantity");
+		let uom = document.getElementById("uom");
+		for (let i = 0; i < product.options.length; i++) {
+			if (product.options[i].textContent.trim() === td[0].textContent.trim()) {
+				product.options[i].style.display = "block";
+				break;
+			}
+		}
+		//	product.options.namedItem(td[0].textContent).style.display="block";
+		product.value = td[0].textContent;
+		price.value = Number(td[1].textContent.substring(2))||0;
+		quantity.value = td[2].textContent;
+		uom.innerHTML = td[3].textContent;
+		addToUpdateButton.textContent = "Update";
+		clearToCancel.textContent = "Cancel";
+		addToUpdateButton.onclick = function() {
+			if (!validateProductDetail()) {
+				return;
+			}
+			let totalAmount = document.getElementById("totalAmount");
+			let oldAmount = parseFloat(td[4].textContent.replace(/[^0-9.]/g, '')) || 0;
+			let newAmount = parseFloat(price.value) * parseFloat(quantity.value);
+			let currentTotal = parseFloat(totalAmount.value.replace(/[^0-9.]/g, '')) || 0;
+			td[0].textContent = product.value;
+			td[1].innerHTML = '₹ ' + price.value;
+			td[2].textContent = quantity.value;
+			td[3].textContent = uom.textContent;
+			td[4].innerHTML = '₹ ' + (price.value * quantity.value);
+			totalAmount.value = '₹ ' + (currentTotal - oldAmount + newAmount).toFixed(2);
+			addToUpdateButton.textContent = "Add";
+			addToUpdateButton.onclick = addLineItem;
+			clearToCancel.textContent = "Clear";
+			clearToCancel.onclick = clear;
+			row.style.backgroundColor = "#fff";
+			legend.textContent = "Enter Purchase Order Line Details";
+			product.options[product.selectedIndex].style.display = "none";
+			clear();
+		};
+		clearToCancel.onclick = function() {
+			addToUpdateButton.textContent = "Add";
+			addToUpdateButton.onclick = addLineItem;
+			clearToCancel.textcontent = "Clear";
+			clearToCancel.onclick = clear;
+			row.style.backgroundColor = "#fff";
+			legend.textContent = "Enter Purchase Order Line Details";
+			product.options[product.selectedIndex].style.display = "none";
+			clear();
+		}
+}
+
+//when click on delete icon in lineItem
+async function deleteLineItem(button) {
+	let product = document.getElementById("productName");
+		let addToUpdateButton = document.getElementById("addButton");
+		let clearToCancel = document.getElementById("clearButton");
+		let row = button.parentNode.parentNode;
+		let alertDetails = document.getElementById("alertDetails");
+		alertDetails.style.display = "block";
+		let isDelete = await alertMsg(`Do you want to delete Product: ${row.cells[0].textContent} ?`);
+		if (isDelete) {
+			let tableBody = row.parentNode;
+			let totalAmount = document.getElementById("totalAmount");
+			let currentTotal = parseInt(totalAmount.value.replace(/[^0-9.]/g, '')) || 0;
+			let amountCell = row.cells[4].textContent;
+			let amount = parseInt(amountCell.replace(/[^0-9.]/g, '')) || 0;
+			let newTotal = currentTotal - amount;
+			totalAmount.value = '₹ ' + newTotal;
+			tableBody.removeChild(row);
+			for (let i = 0; i < product.options.length; i++) {
+				if (product.options[i].textContent.trim() === row.cells[0].textContent.trim()) {
+					product.options[i].style.display = "block";
+					break;
+				}
+			}
+			document.getElementById("legend").textContent = "Enter Purchase Order Line Details";
+			addToUpdateButton.textContent = "Add";
+			addToUpdateButton.onclick = addLineItem;
+			clearToCancel.textContent = "Clear";
+			clearToCancel.onclick = clear;
+			clear();
+		}
+		else {
+			return;
+		}
+
+
+}
+
+function checkFormValidity() {
+	let orderDate = document.getElementById('orderDate').value;
+	let deliveryDate = document.getElementById('deliveryDate').value;
+	let vendorNameDetails = document.getElementById('vendorNameDetails').value;
+	let vendorAddressDetails = document.getElementById('vendorAddressDetails').value;
+	let deliveryAddress = document.getElementById('deliveryAddress').value;
+	let tbody = document.getElementById('lineItemsBody');
+	let isValid = true;
+	if (vendorNameDetails == "Select") {
+		document.getElementById("vendorNameDetails").classList.add("error");
+		isValid = false;
+	} else {
+		document.getElementById("vendorNameDetails").classList.remove("error");
+	}
+	if (vendorAddressDetails == "") {
+		document.getElementById("vendorAddressDetails").classList.add("error");
+		isValid = false;
+	} else {
+		document.getElementById("vendorAddressDetails").classList.remove("error");
+	}
+	if (deliveryAddress == "") {
+		document.getElementById("deliveryAddress").classList.add("error");
+		isValid = false;
+	} else {
+		document.getElementById("deliveryAddress").classList.remove("error");
+	}
+	if (orderDate === "") {
+		document.getElementById("orderDate").classList.add("error");
+		isValid = false;
+	}
+	else {
+		document.getElementById("orderDate").classList.remove("error");
+	}
+	if (deliveryDate == "") {
+		document.getElementById("deliveryDate").classList.add("error");
+		isValid = false;
+	}
+	else {
+		document.getElementById("deliveryDate").classList.remove("error");
+	}
+	if (tbody.innerHTML == "") {
+		document.getElementById("legendError").style.borderColor = "red";
+		isValid = false;
+	}
+	else {
+		document.getElementById("legendError").style.borderColor = "#ccc";
+	}
+	if (!isValid) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+//when click on submit form button
+let purchaseorderDataObject = {};
+function submitForm() {
+	if (!checkFormValidity()) {
+		return false;
+	}
+	else {
+		let orderId = document.getElementById("orderId").innerHTML;
+		let orderDate = document.getElementById("orderDate").value;
+		let deliveryDate = document.getElementById("deliveryDate").value;
+		let vendorNameDetails = document.getElementById("vendorNameDetails").value;
+		let vendorAddressDetails = document.getElementById("vendorAddressDetails").value;
+		let deliveryAddress = document.getElementById("deliveryAddress").value;
+		let totalAmount = document.getElementById("totalAmount").value;
+		let lineItemTable = document.getElementById("lineItemsBody");
+		let rows = lineItemTable.getElementsByTagName("tr");
+		let lineItems = [];
+		for (let eachRow = 0; eachRow < rows.length; eachRow++) {
+			let cells = rows[eachRow].getElementsByTagName("td");
+			let itemData = {};
+			itemData['product'] = cells[0].innerHTML;
+			itemData['price'] = cells[1].innerHTML;
+			itemData['quantity'] = cells[2].innerHTML;
+			itemData['uom'] = cells[3].innerHTML;
+			itemData['amount'] = cells[4].innerHTML;
+			lineItems.push(itemData);
+		}
+		purchaseorderDataObject[orderId] = {
+			"orderId": orderId,
+			"orderDate": orderDate,
+			"deliveryDate": deliveryDate,
+			"vendorNameDetails": vendorNameDetails,
+			"vendorAddressDetails": vendorAddressDetails,
+			"deliveryAddress": deliveryAddress,
+			"totalAmount": totalAmount,
+			"lineItems": lineItems
+		};
+		addPurchaseOrder(purchaseorderDataObject[orderId]);
+		/*docId = docId + 1;*/
+		return true;
+	}
+}
+
+// add purchaseorder
+function addPurchaseOrder(purchaseorder) {
+	let purchaseorderString = JSON.stringify(purchaseorder);
+	let xhttp=new XMLHttpRequest();
+	xhttp.onload=function(){
+		if(this.status==200){
+			let lineItemCount=parseInt(this.responseText);
+			let confirmMsg=document.getElementById("confirmMsg");
+			if (lineItemCount > 0) {
+				//window.location.href = "ViewPurchaseorder?page=1";
+				addRowToPurchaseOrderTable(1);
+				document.getElementById("lineItemsBody").innerHTML = "";
+				document.getElementById("addPurchaseOrderFormModal").style.display = "none";
+				clear();
+				errorClassRemove();
+				if (confirmMsg) {
+					confirmMsg.style.display = 'block';
+					confirmMsg.style.color = 'green';
+					confirmMsg.innerHTML = "Purchase Order Added Successfully!";
+								}
+				//confirmMsg.style.color = 'red';
+				//confirmMsg.innerHTML = "Failed to Add Purchaseorder";
+			} else {
+				if (confirmMsg){
+					confirmMsg.style.display='block';
+			    	confirmMsg.style.color = 'red';
+			    	confirmMsg.innerHTML = "Failed to Add Purchaseorder";
+			}
+		}
+		}
+		else{
+			console.error('Request failed with status:', xhttp.status);
+		}
+		
+	}
+	xhttp.open("POST","InsertPurchaseorder",true);
+	xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xhttp.send("purchaseorder="+purchaseorderString);
+	document.getElementById("lineItemsBody").innerHTML="";
+    document.getElementById("addPurchaseOrderFormModal").style.display="none";
+	clear();
+	errorClassRemove();
+}
+
+
+function addRowToPurchaseOrderTable(pageNumber = 1) {
+	let xhttp = new XMLHttpRequest();
+
+	xhttp.onload = function () {
+		if (this.status == 200) {
+			const htmlString = this.responseText;
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(htmlString, 'text/html');
+
+			const newTbody = doc.querySelector('#purchaseorderRecords tbody');
+			const newPagination = doc.querySelector('#pagination');
+			const existingTbody = document.querySelector('#purchaseorderRecords tbody');
+			const existingPagination = document.querySelector('#pagination');
+
+			if (existingTbody && newTbody) {
+				existingTbody.innerHTML = newTbody.innerHTML;
+			}
+
+			if (existingPagination && newPagination) {
+				existingPagination.innerHTML = newPagination.innerHTML;
+			}
+		} else {
+			console.error('Failed to fetch data from ViewPurchaseorder servlet.');
+		}
+	};
+
+	xhttp.open('GET', "ViewPurchaseorder?page=" + pageNumber, true);
+	xhttp.send();
+}
+
+
+//Update Purchaseorder
+
+function updatePurchaseorder(button, lineItems) {
+    document.getElementById("addPurchaseOrderFormModal").style.display = "block";
+    document.title = "Update Purchase Order";
+    clear();
+
+    let updateRow = button.parentNode.parentNode;
+    let orderId = updateRow.cells[1].textContent;
+	
+    document.getElementById("formHeading").innerHTML = "Update Purchase Order";
+    document.getElementById('orderId').innerHTML = orderId;
+	document.getElementById('orderDate').value = updateRow.cells[2].textContent;
+    document.getElementById('deliveryDate').value = updateRow.cells[3].textContent;
+    document.getElementById('vendorNameDetails').value = updateRow.cells[4].textContent;
+    document.getElementById('vendorAddressDetails').value = updateRow.cells[5].textContent;
+    document.getElementById('deliveryAddress').value = updateRow.cells[6].textContent;
+    document.getElementById('totalAmount').value = updateRow.cells[7].textContent;
+
+    // Clear and reset product options
+    let LineItemBody = document.getElementById("lineItemsBody");
+    LineItemBody.innerHTML = "";
+    let productOptions = document.getElementById("productName").options;
+    for (let i = 0; i < productOptions.length; i++) {
+        productOptions[i].style.display = "block";
+    }
+
+    // Insert line items
+    lineItems.forEach((lineItem, index) => {
+        let newRow = LineItemBody.insertRow(index);
+        newRow.insertCell(0).innerHTML = lineItem.product;
+        newRow.insertCell(1).innerHTML = '&#8377 ' + lineItem.price;
+        newRow.insertCell(2).innerHTML = lineItem.quantity;
+        newRow.insertCell(3).innerHTML = lineItem.uom;
+        newRow.insertCell(4).innerHTML = '&#8377 ' + lineItem.amount;
+        newRow.insertCell(5).innerHTML = '<i class="fa fa-edit" onclick="updateLineItem(this)"></i><i class="fa fa-trash" onclick="deleteLineItem(this)"></i>';
+		let productSelect = document.getElementById("productName");
+		let optionToHide = null;
+
+		for (let i = 0; i < productSelect.options.length; i++) {
+		    if (productSelect.options[i].value === lineItem.product) {
+		        optionToHide = productSelect.options[i];
+		        break;
+		    }
+		}
+
+		if (optionToHide) {
+		    optionToHide.style.display = "none";
+		}
+    });
+
+    // Setup Update Button
+    let submitToUpdateButton = document.getElementById("submit");
+    submitToUpdateButton.textContent = "Update";
+    submitToUpdateButton.onclick = function () {
+        if (!checkFormValidity()) return;
+
+        let orderDate = document.getElementById('orderDate').value;
+        let deliveryDate = document.getElementById('deliveryDate').value;
+        let vendorName = document.getElementById('vendorNameDetails').value;
+        let vendorAddress = document.getElementById('vendorAddressDetails').value;
+        let deliveryAddress = document.getElementById('deliveryAddress').value;
+        let totalAmount = document.getElementById('totalAmount').value;
+
+        // Collect line items
+        let tbody = document.getElementById("lineItemsBody");
+        let row = tbody.getElementsByTagName('tr');
+        let lineItems = [];
+
+        for (let  eachRow= 0; eachRow < row.length; eachRow++) {
+		     let cells = row[eachRow].getElementsByTagName("td");
+		     let itemData = {};
+		     itemData["product"] = cells[0].innerHTML;
+		     itemData[`price`] = cells[1].innerHTML.substring(1);
+		     itemData[`quantity`] = cells[2].innerHTML;
+		     itemData[`uom`] = cells[3].innerHTML;
+		     itemData[`amount`] = cells[4].innerHTML.substring(1);
+		     lineItems.push(itemData);
+		}
+
+        let purchaseOrderObj = {
+            "orderId": orderId,
+            "orderDate": orderDate,
+            "deliveryDate": deliveryDate,
+            "vendorName": vendorName,
+            "vendorAddress": vendorAddress,
+            "deliveryAddress": deliveryAddress,
+            "totalAmount": totalAmount,
+            "lineItems": lineItems
+        };
+
+        let xhttp = new XMLHttpRequest();
+        xhttp.onload = function () {
+            let confirmMsg = document.getElementById("confirmMsg");
+            confirmMsg.style.display = 'block';
+			let resText = this.responseText;
+			console.log(resText);
+			let response = JSON.parse(resText);
+			if (this.status == 200 && parseInt(response.rowCount) > 0) {
+				button.onclick = function() {updatePurchaseorder(button, response.lineItems)}
+				let viewButton = button.parentNode.querySelector(".fa-eye");
+				viewButton.onclick = function() {showLineItem(viewButton, response.lineItems)}
+			    confirmMsg.style.color = 'green';
+			    confirmMsg.innerHTML = `Purchase Order ID-${orderId} Updated Successfully`;
+
+			    let updatetd = updateRow.getElementsByTagName("td");
+			    updatetd[2].innerHTML = formatDateToYYYYMMDD(orderDate);
+			    updatetd[3].innerHTML = formatDateToYYYYMMDD(deliveryDate);
+			    updatetd[4].innerHTML = vendorName;
+			    updatetd[5].innerHTML = vendorAddress;
+			    updatetd[6].innerHTML = deliveryAddress;
+				totalAmount = totalAmount.replace(/[^0-9.]/g, '');
+			    updatetd[7].innerHTML = parseFloat(totalAmount).toFixed(1);
+			} else {
+                confirmMsg.style.color = 'red';
+                confirmMsg.innerHTML = `Purchase Order ID-${orderId} Failed to Update`;
+            }
+		/*	setTimeout(function () {
+			       confirmMsg.style.display = 'none';
+			   }, 3000);*/
+        }
+
+        xhttp.open("POST", "UpdatePurchaseorder", true);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send("purchaseorder=" + JSON.stringify(purchaseOrderObj));
+
+        document.getElementById("lineItemsBody").innerHTML = "";
+        document.getElementById("addPurchaseOrderFormModal").style.display = "none";
+        clear();
+        errorClassRemove();
+		//window.location.href = "";
+    };
+}
+//alert box
+function alertMsg(msg) {
+    document.getElementById("alertContent").innerHTML = msg;
+    let isClicked;
+    return new Promise((resolve) => {
+        let yesBtn = document.getElementById("yes");
+        let noBtn = document.getElementById("no");
+        yesBtn.onclick = function() {
+            isClicked = true;
+            alertDetails.style.display = "none";
+            resolve(isClicked);
+        };
+        noBtn.onclick = function() {
+            isClicked = false;
+            alertDetails.style.display = "none";
+            resolve(isClicked);
+        };
+    });
+}
+
+function refreshTableOnly(page, message = '') {
+	const xhttp = new XMLHttpRequest();
+	xhttp.onload = function () {
+		if (this.status === 200) {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(this.responseText, 'text/html');
+
+			// Replace table body
+			const newTbody = doc.querySelector('#purchaseorderRecords tbody');
+			const existingTbody = document.querySelector('#purchaseorderRecords tbody');
+			const newPagination = doc.querySelector('#pagination');
+			const existingPagination = document.querySelector('#pagination');
+			const rowCount = newTbody ? newTbody.rows.length : 0;
+
+			if (rowCount === 0 && page > 1) {
+								// Try previous page if current becomes empty
+				refreshTableOnly(page - 1, message);
+				return;
+			}
+			
+			if (newTbody && existingTbody) {
+				existingTbody.innerHTML = newTbody.innerHTML;
+			}
+
+			// Replace pagination
+		
+			if (newPagination && existingPagination) {
+				existingPagination.innerHTML = newPagination.innerHTML;
+			}
+
+			// Show confirm message
+			if (message) {
+				let confirmMsg = document.getElementById("confirmMsg");
+				confirmMsg.style.display = 'block';
+				confirmMsg.style.color = 'green';
+				confirmMsg.innerText = message;
+
+			}
+		}
+	};
+	xhttp.open("GET", `ViewPurchaseorder?page=${page}`, true);
+	xhttp.send();
+}
+
+
+
+// Delete Purchase Order
+async function deletePurchaseorder(button) {
+    let row = button.parentNode.parentNode;
+    let orderId = row.cells[1].textContent;
+    let alertDetails = document.getElementById("alertDetails");
+    alertDetails.style.display = "block";
+
+    
+    const isDelete = await alertMsg(`Do you want to delete Purchase Order ID: ${orderId}?`);
+	if(!isDelete) return;
+	const orderIds = [orderId];
+    
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function () {
+    // confirmMsg.style.display = 'block';
+            if (this.status == 200) {
+                const deletedCount = parseInt(this.responseText);
+				if (deletedCount > 0) {
+				    confirmMsg.style.color = 'green';
+				    confirmMsg.innerHTML = `Purchase Order ID-${orderId} Deleted Successfully`;
+				    row.remove(); 
+					const searchInput = document.getElementById("searchPurchaseOrder").value.trim();
+					//let filterBy = document.getElementById("filterDropdown").value;
+                    if (searchInput.length > 0) {
+						window.name = `Purchase Order ID-${orderId} Deleted Successfully`;
+						filterTable();
+					}else{
+					const tableBody = document.getElementById("purchaseorderBody");
+					const remainingRows= tableBody.rows.length;
+					const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+					//const newPage = (remainingRows  ===0 && currentPage > 1) ? currentPage - 1 : currentPage;
+					const redirectPage = (remainingRows === 0 && currentPage > 1) ? currentPage - 1 : currentPage;
+					//refreshTableOnly(redirectPage, `Purchase Order ID-${orderId} Deleted Successfully!`);
+					window.name = `Purchase Order ID-${orderId} Deleted Successfully!`;
+					//window.location.href = `ViewPurchaseorder?page=${redirectPage}`;
+					refreshTableOnly(redirectPage);
+				}
+					//let currentPage = parseInt(new URLSearchParams(window.location.search).get("page") || 1);
+					//let redirectPage = (remainingRows === 0 && currentPage > 1)? currentPage - 1 : currentPage;
+					//let alertMsg = encodeURIComponent(`Purchase Order ID-${orderId} Deleted Successfully`);
+				  //  window.location.href = `ViewPurchaseorder?page=${redirectPage}&confirmMsg=${alertMsg}`;
+				} else {
+					confirmMsg.style.display = "block";
+				    confirmMsg.style.color = 'red';
+				    confirmMsg.innerHTML = `Purchase Order ID-${orderId} Failed to Delete`;
+				}
+            } else {
+                console.error('Request failed with status:', xhttp.status);
+            }
+			
+        };
+
+        xhttp.open("POST", "DeletePurchaseorder", false);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send("orderIds=" + JSON.stringify(orderIds));
+      //  window.location.href = ""; // reload page
+    } /*else {
+        return;
+    }
+}*/
+
+function enableDeleteBtn() {
+	let deleteButton = document.getElementById("deletePurchaseOrderButton");
+	let selectAllCheckbox = document.getElementById("selectAllCheckbox");
+	let checkList = document.getElementById("purchaseorderBody").getElementsByClassName("check");
+	let checkCount = 0;
+	for (let i = checkList.length - 1; i >= 0; i--) {
+		let isChecked = checkList[i].checked;
+		if (isChecked) {
+			checkCount++;
+			checkList[i].parentNode.parentNode.style.backgroundColor = "#f2f2f2";
+		}
+		else {
+			checkList[i].parentNode.parentNode.style.backgroundColor = "white";
+		}
+	}
+	if (checkCount) {
+		deleteButton.disabled = false;
+	}
+	else {
+		deleteButton.disabled = true;
+	}
+	if (checkCount == checkList.length) {
+		selectAllCheckbox.checked = true;
+	}
+	else {
+		selectAllCheckbox.checked = false;
+	}
+
+}
+
+document.getElementById("ok").onclick = function () {
+    document.getElementById("confirmDiv").style.display = "none";
+};
+window.addEventListener("DOMContentLoaded", () => {
+	const confirmMsg = window.name;
+	if (confirmMsg) {
+		const msgDiv = document.getElementById("confirmMsg");
+		if (msgDiv) {
+			msgDiv.style.display = "block";
+			msgDiv.style.color = "green";
+			msgDiv.innerText = confirmMsg;
+		}
+		window.name = "";
+	}
+});
+
+let currentPage = parseInt(new URLSearchParams(window.location.search).get("page") || 1);
+
+async function deleteSelectedPurchaseOrder() {
+	const alertDetails = document.getElementById("alertDetails");
+	//const deleteButton = document.getElementById("deletePurchaseOrderButton");
+	const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+	const checkList = document.getElementById("purchaseorderBody").getElementsByClassName("check");
+
+	let orderIds = [];
+
+	// Collect selected order IDs
+	for (let i = checkList.length - 1; i >= 0; i--) {
+		if (checkList[i].checked) {
+			let checkedRow = checkList[i].parentNode.parentNode;
+			orderIds.push(checkedRow.cells[1].textContent); // orderId column
+		}
+	}
+
+	if (orderIds.length === 0) {
+		alert("No purchase orders selected.");
+		return;
+	}
+
+	const msg = (orderIds.length === 1)
+		? `Do you want to delete Purchase Order ID: ${orderIds[0]}?`
+		: `Do you want to delete all the selected purchase orders?`;
+
+	alertDetails.style.display = "block";
+
+	const isDelete = await alertMsg(msg);
+
+	if (isDelete) {
+		const xhttp = new XMLHttpRequest();
+		let deletedCount = 0;
+
+		xhttp.onload = function () {
+			const confirmMsg = document.getElementById("confirmMsg");
+			if (this.status === 200) {
+				deletedCount = parseInt(this.responseText);
+				if (deletedCount > 0) {
+					confirmMsg.style.color = 'green';
+					confirmMsg.innerText = "Purchase Order(s) Deleted Successfully!";
+				} else {
+					confirmMsg.style.color = 'red';
+					confirmMsg.innerText = "Failed to Delete Purchase Order(s)!";
+				}
+			}
+		};
+		xhttp.open("POST", "DeletePurchaseorder", false);
+		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xhttp.send("orderIds=" + JSON.stringify(orderIds));
+		// Remove from DOM
+		for (let i = checkList.length - 1; i >= 0; i--) {
+			if (checkList[i].checked) {
+				let row = checkList[i].parentNode.parentNode;
+				row.parentNode.removeChild(row);
+			}
+		}
+		if (selectAllCheckbox) {
+			selectAllCheckbox.checked = false;
+		}
+		const searchInput = document.getElementById("searchPurchaseOrder").value.trim();
+		if (searchInput.length > 0) {
+			window.name = `Purchase Order(s) Deleted Successfully!`;
+			filterTable();
+		}else{
+		const tableBody = document.getElementById("purchaseorderBody");
+		if (tableBody.rows.length === 0 && currentPage > 1) {
+			const prevPage = currentPage - 1;
+			window.name = "Purchase Order(s) Deleted Successfully!";
+			window.location.href = `ViewPurchaseorder?page=${prevPage}`;
+			return; 
+		}
+		refreshTableOnly(currentPage, "Purchase Order(s) Deleted Successfully!");
+	}
+}
+}
+
+function toggleSelectAll(checkBox) {
+	let checkList = document.getElementById("purchaseorderBody").getElementsByClassName("check");
+	let deleteButton = document.getElementById("deletePurchaseOrderButton");
+
+	if (document.getElementById("purchaseorderBody").innerHTML !== "") {
+		if (checkBox.checked) {
+			deleteButton.disabled = false;
+			for (let i = checkList.length - 1; i >= 0; i--) {
+				checkList[i].checked = true;
+				checkList[i].parentNode.parentNode.style.backgroundColor = "#f2f2f2";
+			}
+		} else {
+			deleteButton.disabled = true;
+			for (let i = checkList.length - 1; i >= 0; i--) {
+				checkList[i].checked = false;
+				checkList[i].parentNode.parentNode.style.backgroundColor = "white";
+			}
+		}
+	} else {
+		deleteButton.disabled = true;
+		checkBox.checked = false;
+	}
+}
+
+let searchPurchaseOrderInput = document.getElementById("searchPurchaseOrder");
+let filterByDropdown = document.getElementById("filterDropdown");
+let purchaseOrderBody = document.getElementById("purchaseorderBody");
+let paginationDiv = document.getElementById("pagination");
+
+//let searchTimeout = null;
+
+searchPurchaseOrderInput.addEventListener("input", filterTable);
+filterByDropdown.addEventListener("change", function(){
+	if (searchPurchaseOrderInput.value.trim().length > 0) {
+	        filterTable();
+	    }
+	});
+function filterTable() {
+    let searchInput = searchPurchaseOrderInput.value.trim();
+
+    // If no input, stay on the current page, do nothing
+    if (searchInput.length === 0) {
+		window.location.href = "ViewPurchaseorder?page=1";
+        return;
+    }
+
+    let filterBy = filterByDropdown.value || "documentNo";
+
+    // Clear previous table and pagination
+    purchaseOrderBody.innerHTML = "";
+    paginationDiv.innerHTML = "";
+
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            let ordersArray = JSON.parse(this.responseText);
+
+            if (ordersArray.length > 0) {
+                purchaseOrderBody.innerHTML = "";
+
+                ordersArray.forEach(function (orderObj) {
+                    let newRow = purchaseOrderBody.insertRow(-1);
+
+                    newRow.insertCell(0).innerHTML = `<input type="checkbox" class="check" onclick="enableDeleteBtn()">`;
+                    newRow.insertCell(1).textContent = orderObj.documentNo || "";
+                    newRow.insertCell(2).textContent = orderObj.orderDate || "";
+                    newRow.insertCell(3).textContent = orderObj.deliveryDate || "";
+                    newRow.insertCell(4).textContent = orderObj.vendorName || "";
+                    newRow.insertCell(5).textContent = orderObj.vendorAddress || "";
+                    newRow.insertCell(6).textContent = orderObj.deliveryAddress || "";
+                    newRow.insertCell(7).textContent = orderObj.totalAmount || "";
+
+                    let lineItems = JSON.stringify(orderObj.lineItems || []);
+                    newRow.insertCell(8).innerHTML = `
+                        <i class="fa fa-eye" onclick='showLineItem(this, ${lineItems})'></i>
+                        <i class="fa fa-edit" onclick='updatePurchaseorder(this, ${lineItems})'></i>
+                        <i class="fa fa-trash" onclick="deletePurchaseorder(this)"></i>`;
+                });
+
+                paginationDiv.innerHTML = `<a href="javascript:void(0);" id="backButton">‹ Back</a>`;
+                document.getElementById("backButton").addEventListener("click", function () {
+                    resetTableAndReload();
+                    window.location.href = "";
+                });
+            } else {
+                purchaseOrderBody.innerHTML = `<tr><td id='notFound' colspan='10'>Purchase Order Not Found !!</td></tr>`;
+                paginationDiv.innerHTML = `<a href="javascript:void(0);" id="backButton">‹ Back</a>`;
+                document.getElementById("backButton").addEventListener("click", function () {
+                    resetTableAndReload();
+                });
+            }
+        }
+		let confirmMsg = document.getElementById("confirmMsg");
+		if (window.name && confirmMsg) {
+		    confirmMsg.style.display = "block";
+		    confirmMsg.style.color = "green";
+		    confirmMsg.innerHTML = window.name;
+		    window.name = ""; // Clear it so it doesn't show again
+		}
+    };
+
+    let url = "searchPurchaseorder?filterType=" + encodeURIComponent(filterBy) +
+              "&filterValue=" + encodeURIComponent(searchInput);
+
+    xhttp.open("GET", url, true);
+    xhttp.send();
+}
+
+
+// Reset the table and reload full purchase orders without filter
+function resetTableAndReload() {
+    searchPurchaseOrderInput.value = "";
+    filterByDropdown.value = "";
+
+    purchaseOrderBody.innerHTML = "";
+    paginationDiv.innerHTML = "";
+
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            let ordersArray = JSON.parse(this.responseText);
+
+            if (ordersArray.length > 0) {
+                ordersArray.forEach(function (orderObj) {
+                    let newRow = purchaseOrderBody.insertRow(-1);
+
+                    newRow.insertCell(0).innerHTML = `<input type="checkbox" class="check" onclick="enableDeleteBtn()">`;
+                    newRow.insertCell(1).textContent = orderObj.documentNo || "";
+                    newRow.insertCell(2).textContent = orderObj.orderDate || "";
+                    newRow.insertCell(3).textContent = orderObj.deliveryDate || "";
+                    newRow.insertCell(4).textContent = orderObj.vendorName || "";
+                    newRow.insertCell(5).textContent = orderObj.vendorAddress || "";
+                    newRow.insertCell(6).textContent = orderObj.deliveryAddress || "";
+                    newRow.insertCell(7).textContent = orderObj.totalAmount || "";
+
+                    let lineItems = JSON.stringify(orderObj.lineItems || []);
+                    newRow.insertCell(8).innerHTML = `
+                        <i class="fa fa-eye" onclick='showLineItem(this, ${lineItems})'></i>
+                        <i class="fa fa-edit" onclick='updatePurchaseorder(this, ${lineItems})'></i>
+                        <i class="fa fa-trash" onclick="deletePurchaseorder(this)"></i>`;
+                });
+            } else {
+                purchaseOrderBody.innerHTML = `<tr><td id='notFound' colspan='10'>No Purchase Orders Found !!</td></tr>`;
+            }
+        }
+    };
+    xhttp.open("GET", "searchPurchaseorder", true);
+    xhttp.send();
+}
+
